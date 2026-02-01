@@ -1,4 +1,4 @@
-# Modul demo: capcane de securitate (Open Redirect si XSS)
+# Modul demo:Open Redirect si XSS
 
 Acest modul face parte din proiectul realizat in echipa pentru disciplina de securitate. Scopul lui este de a demonstra doua vulnerabilitati frecvente in aplicatiile web: **Open Redirect** (redirectionare deschisa, utilizata in atacuri de tip phishing) si **XSS** (Cross-Site Scripting), in scenariul furtului de token din LocalStorage.
 
