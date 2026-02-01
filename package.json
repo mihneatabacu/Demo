@@ -1,0 +1,16 @@
+{
+  "name": "security-pitfalls-demo",
+  "version": "1.0.0",
+  "description": "Educational demo: Open Redirect and XSS (LocalStorage theft)",
+  "scripts": {
+    "start": "cross-env NODE_OPTIONS=--no-deprecation concurrently \"npm run vulnerable\" \"npm run attacker\"",
+    "start:secure": "cross-env NODE_OPTIONS=--no-deprecation npm run secure",
+    "vulnerable": "cd vulnerable-app && node server.js",
+    "attacker": "cd attacker-server && node evil-server.js",
+    "secure": "cd secure-app && node server.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3"
+  }
+}

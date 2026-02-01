@@ -1,0 +1,11 @@
+{
+  "name": "secure-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Secure implementation: OAuth 2.1 redirect_uri whitelist + XSS fix (textContent)",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}

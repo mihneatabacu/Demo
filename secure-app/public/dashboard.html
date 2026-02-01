@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Corporate Dashboard (Secure)</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f1f5f9; }
+    nav { background: #0f766e; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .error-container { text-align: center; margin-top: 5rem; color: #ef4444; }
+    .search-box { margin-top: 2rem; padding: 1rem; border-left: 4px solid #059669; background: #ecfdf5; }
+    #userName { font-weight: bold; color: #059669; }
+    .hidden { display: none; }
+    .badge { font-size: 0.7rem; background: #d1fae5; color: #047857; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
+  </style>
+</head>
+<body>
+
+  <div id="authError" class="error-container hidden">
+    <h1>403 - Access Denied</h1>
+    <p>No valid session token found. Please log in again.</p>
+  </div>
+
+  <div id="mainContent" class="hidden">
+    <nav>
+      <span>Acme Dashboard <span class="badge">Secure</span></span>
+      <span id="welcomeMsg">Welcome, <span id="userName">User</span></span>
+    </nav>
+
+    <div class="container">
+      <div class="card">
+        <h3>Internal Search</h3>
+        <p>Search for employee records or financial reports. (Query is escaped — no XSS.)</p>
+        
+        <div class="search-box" id="searchOutput">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const fakeJWT = "eyJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiQ0VPIFZpY3RpbSIsInJvbGUiOiJhZG1pbiJ9.dummy";
+
+    if (!localStorage.getItem('access_token') && window.location.search.includes('login=true')) {
+      localStorage.setItem('access_token', fakeJWT);
+    }
+
+    const token = localStorage.getItem('access_token');
+    const mainContent = document.getElementById('mainContent');
+    const authError = document.getElementById('authError');
+
+    if (!token) {
+      authError.classList.remove('hidden');
+    } else {
+      mainContent.classList.remove('hidden');
+
+      try {
+        const base64Payload = token.split('.')[1];
+        const payload = JSON.parse(atob(base64Payload));
+        document.getElementById('userName').textContent = payload.name;
+      } catch (e) {
+        document.getElementById('userName').textContent = "Unknown User";
+      }
+
+      // Randare query doar cu textContent — niciodata innerHTML (remediere XSS).
+      const params = new URLSearchParams(window.location.search);
+      const query = params.get('q') || 'Type a query...';
+      const el = document.getElementById('searchOutput');
+      el.textContent = '';
+      el.appendChild(document.createTextNode('Results for: '));
+      const strong = document.createElement('strong');
+      strong.textContent = query;
+      el.appendChild(strong);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# Node
+node_modules/
+npm-debug.log*
+package-lock.json   # opțional, vezi mai jos
+
+# Build / dist
+dist/
+build/
+
+# OS / editor
+.vscode/
+.DS_Store

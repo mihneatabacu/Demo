@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acme Corp - Enterprise Login</title>
+  <style>
+    :root { --primary: #2563eb; --bg: #f8fafc; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .login-card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+    .logo { font-weight: 800; font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem; letter-spacing: -0.025em; }
+    h1 { font-size: 1.25rem; color: #1e293b; margin-bottom: 0.5rem; }
+    p { color: #64748b; font-size: 0.875rem; margin-bottom: 2rem; }
+    .btn { display: block; background: var(--primary); color: white; text-decoration: none; padding: 0.75rem; border-radius: 6px; font-weight: 600; transition: background 0.2s; }
+    .btn:hover { background: #1d4ed8; }
+    .footer-note { margin-top: 1.5rem; font-size: 0.75rem; color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="logo">ACME CORP</div>
+    <h1>Identity Gateway</h1>
+    <p>Please sign in to access your corporate dashboard.</p>
+    
+    <a href="/login" class="btn">Single Sign-On (SSO)</a>
+    
+    <div class="footer-note">
+      Protected by Enterprise-Grade Security
+    </div>
+  </div>
+</body>
+</html>

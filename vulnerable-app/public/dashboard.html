@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Corporate Dashboard</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f1f5f9; }
+    nav { background: #1e293b; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .container { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .error-container { text-align: center; margin-top: 5rem; color: #ef4444; }
+    .search-box { margin-top: 2rem; padding: 1rem; border-left: 4px solid #2563eb; background: #eff6ff; }
+    #userName { font-weight: bold; color: #2563eb; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <div id="authError" class="error-container hidden">
+    <h1>403 - Access Denied</h1>
+    <p>No valid session token found. Please log in again.</p>
+  </div>
+
+  <div id="mainContent" class="hidden">
+    <nav>
+      <span>Acme Dashboard</span>
+      <span id="welcomeMsg">Welcome, <span id="userName">User</span></span>
+    </nav>
+
+    <div class="container">
+      <div class="card">
+        <h3>Internal Search</h3>
+        <p>Search for employee records or financial reports.</p>
+        
+        <div class="search-box" id="searchOutput">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. Simulare JWT realist (payload Base64). Payload: { "name": "CEO Victim", "role": "admin" }
+    const fakeJWT = "eyJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiQ0VPIFZpY3RpbSIsInJvbGUiOiJhZG1pbiJ9.dummy";
+    
+    // Seteaza token-ul doar la un login "proaspat" (scop demonstrativ)
+    if (!localStorage.getItem('access_token') && window.location.search.includes('login=true')) {
+        localStorage.setItem('access_token', fakeJWT);
+    }
+
+    const token = localStorage.getItem('access_token');
+    const mainContent = document.getElementById('mainContent');
+    const authError = document.getElementById('authError');
+
+    if (!token) {
+      authError.classList.remove('hidden');
+    } else {
+      mainContent.classList.remove('hidden');
+      
+      // 2. Decodare payload JWT pentru realism
+      try {
+        const base64Payload = token.split('.')[1];
+        const payload = JSON.parse(atob(base64Payload));
+        document.getElementById('userName').textContent = payload.name;
+      } catch (e) {
+        document.getElementById('userName').textContent = "Unknown User";
+      }
+
+      // 3. VULNERABILITATE: XSS — q este randat cu innerHTML; foloseste payload codat in URL
+      //    ca "&" din payload sa nu fie interpretat ca separator de query (ex. .../steal?token='&...)
+      const params = new URLSearchParams(window.location.search);
+      const query = params.get('q') || 'Type a query...';
+      const el = document.getElementById('searchOutput');
+      el.innerHTML = 'Results for: <strong>' + query + '</strong>';
+    }
+  </script>
+</body>
+</html>
