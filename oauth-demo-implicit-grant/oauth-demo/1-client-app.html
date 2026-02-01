@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    h1 { margin: 0 0 10px; font-size: 28px; }
+    p { margin: 0 0 30px; opacity: 0.9; font-size: 14px; }
+    button {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .info {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: left;
+      line-height: 1.6;
+    }
+    code {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Demo App</h1>
+    <p>OAuth 2.0 Token Leakage Vulnerability Demo</p>
+    
+    <button onclick="login()">Logheaza-te cu Google</button>
+    
+    <div class="info">
+      <strong>Ce se va întâmpla când apesi butonul:</strong><br>
+      1. Vei fi redirecționat la Authorization Server<br>
+      2. Vei aproba permisiunea<br>
+      3. Vei fi redirecționat înapoi cu tokenul în URL<br>
+      4. Tokenul va fi vizibil în bara de adrese
+    </div>
+  </div>
+
+  <script>
+    function login() {
+      const currentPath = window.location.pathname;
+      const currentDir = currentPath.substring(0, currentPath.lastIndexOf('/'));
+      
+      const redirectUri = window.location.origin + currentDir + '/1-client-app.html';
+      
+      const authUrl = window.location.origin + currentDir + '/2-auth-server.html' +
+        '?response_type=token' + 
+        '&client_id=my_app_123' + 
+        '&redirect_uri=' + encodeURIComponent(redirectUri) + 
+        '&scope=profile email'; 
+      
+      window.location.href = authUrl;
+    }
+
+    
+    window.addEventListener('DOMContentLoaded', function() {
+      const hash = window.location.hash;
+      
+      if (hash && hash.includes('access_token=')) {
+        const params = new URLSearchParams(hash.substring(1));
+        const token = params.get('access_token');
+        
+        if (token) {
+          
+          const container = document.querySelector('.container');
+          container.innerHTML = `
+            <h1>Autentificat cu succes!</h1>
+            <div class="info" style="background: rgba(239, 68, 68, 0.2); border: 2px solid #ef4444;">
+              <strong>VULNERABILITATE DEMONSTRATĂ:</strong><br><br>
+              <strong>Tokenul tău este:</strong><br>
+              <code style="word-break: break-all; background: rgba(0,0,0,0.5);">${token}</code>
+              <br><br>
+              <strong>Verifică bara de adrese a browserului!</strong><br>
+              Tokenul este vizibil în URL după simbolul #<br><br>
+              <strong>Probleme de securitate:</strong><br>
+              • Tokenul este în browser history<br>
+              • Orice script poate citi window.location.hash<br>
+              • Poate fi furat prin referrer header<br>
+              • Poate fi văzut de proxy-uri sau extensii<br><br>
+              <button onclick="deschideAtacator()" style="background: #ef4444; color: white; margin-top: 10px;">
+              Cum fură tokenul un atacator
+              </button>
+            </div>
+          `;
+        }
+      }
+    });
+
+    function deschideAtacator() {
+      const currentPath = window.location.pathname;
+      const currentDir = currentPath.substring(0, currentPath.lastIndexOf('/'));
+      const attackerUrl = window.location.origin + currentDir + '/3-attacker.html';
+      
+      window.open(attackerUrl, '_blank');
+    }
+  </script>
+</body>
+</html>
